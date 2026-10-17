@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: OTA_Updates_Backend
