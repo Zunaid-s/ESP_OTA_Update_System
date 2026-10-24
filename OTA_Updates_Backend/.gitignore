@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Firmware binaries (too large to commit) ###
+firmware-storage/**/*.bin
+firmware-storage/**/*.elf
+firmware-storage/**/*.hex
+!firmware-storage/.gitkeep

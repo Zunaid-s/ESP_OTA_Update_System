@@ -1,23 +1,16 @@
 #include <Arduino.h>
 
-// put function declarations here:
-
+// #define led 36
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(32, OUTPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.println("LED is on");
 
-
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, LOW);
-
-  delay(1000);
+  if(touchRead(15) < 50){
+    digitalWrite(32, HIGH);
+  } 
+  else {
+    digitalWrite(32, LOW);
+  }
 }
-
-// put function definitions here:

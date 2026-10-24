@@ -1,3 +1,31 @@
 spring:
   application:
     name: OTA_Updates_Backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ota_updates_db
+    username: ota_user
+    password: ota_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQL11Dialect
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+
+app:
+  firmware:
+    storage-path: ./firmware-storage
+  mqtt:
+    broker-host: localhost
+    broker-port: 1883
+  signing:
+    key-env-var: OTA_SIGNING_KEY
