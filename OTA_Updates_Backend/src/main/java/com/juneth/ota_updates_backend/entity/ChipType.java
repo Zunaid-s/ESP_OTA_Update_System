@@ -29,6 +29,9 @@ public class ChipType {
 
     private String description;
 
+    @Column(name = "flash_size")
+    private Long flashSize;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

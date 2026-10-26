@@ -11,7 +11,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -32,9 +34,8 @@ public class Device {
     @JoinColumn(name = "chip_type_id", nullable = false)
     private ChipType chipType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
-    private DeviceGroup deviceGroup;
+    @Column(nullable = false, unique = true)
+    private String macAddress;
 
     @Column(nullable = false, unique = true)
     private String apiKey;
@@ -55,9 +56,20 @@ public class Device {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @ManyToMany
+    @JoinTable(
+            name = "device_group_memberships",
+            joinColumns = @JoinColumn(name = "device_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
+    @Builder.Default
+    private Set<DeviceGroup> deviceGroups = new HashSet<>();
+
     @OneToMany(mappedBy = "device", cascade = CascadeType.PERSIST)
+    @Builder.Default
     private List<UpdateAssignment> updateAssignments = new ArrayList<>();
 
     @OneToMany(mappedBy = "device", cascade = CascadeType.PERSIST)
+    @Builder.Default
     private List<UpdateHistory> updateHistories = new ArrayList<>();
 }

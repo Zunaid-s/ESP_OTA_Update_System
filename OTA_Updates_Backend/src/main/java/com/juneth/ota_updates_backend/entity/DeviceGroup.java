@@ -10,7 +10,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -37,9 +39,11 @@ public class DeviceGroup {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "deviceGroup", cascade = CascadeType.PERSIST)
-    private List<Device> devices = new ArrayList<>();
+    @ManyToMany(mappedBy = "deviceGroups")
+    @Builder.Default
+    private Set<Device> devices = new HashSet<>();
 
     @OneToMany(mappedBy = "deviceGroup", cascade = CascadeType.PERSIST)
+    @Builder.Default
     private List<UpdateAssignment> updateAssignments = new ArrayList<>();
 }
