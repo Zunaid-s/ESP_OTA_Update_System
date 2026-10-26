@@ -30,7 +30,7 @@ public class ChipType {
     private String description;
 
     @Column(name = "flash_size")
-    private Long flashSize;
+    private Integer flashSize;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

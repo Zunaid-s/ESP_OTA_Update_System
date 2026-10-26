@@ -34,7 +34,7 @@ public class Device {
     @JoinColumn(name = "chip_type_id", nullable = false)
     private ChipType chipType;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 17)
     private String macAddress;
 
     @Column(nullable = false, unique = true)
