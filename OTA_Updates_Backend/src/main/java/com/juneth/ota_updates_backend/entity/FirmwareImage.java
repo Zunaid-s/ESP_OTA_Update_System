@@ -39,6 +39,7 @@ public class FirmwareImage {
 
     private String checksum;
 
+    @Column(nullable = false)
     private String signature;
 
     @Column(nullable = false)
@@ -55,8 +56,10 @@ public class FirmwareImage {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "firmwareImage", cascade = CascadeType.PERSIST)
+    @Builder.Default
     private List<UpdateAssignment> updateAssignments = new ArrayList<>();
 
     @OneToMany(mappedBy = "firmwareImage", cascade = CascadeType.PERSIST)
+    @Builder.Default
     private List<UpdateHistory> updateHistories = new ArrayList<>();
 }
