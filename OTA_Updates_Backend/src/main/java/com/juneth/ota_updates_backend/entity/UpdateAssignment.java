@@ -50,5 +50,6 @@ public class UpdateAssignment {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "updateAssignment", cascade = CascadeType.PERSIST)
+    @Builder.Default
     private List<UpdateHistory> updateHistories = new ArrayList<>();
 }

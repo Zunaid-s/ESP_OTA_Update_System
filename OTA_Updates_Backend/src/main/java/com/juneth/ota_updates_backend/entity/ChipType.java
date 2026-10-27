@@ -37,8 +37,10 @@ public class ChipType {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "chipType", cascade = CascadeType.PERSIST)
+    @Builder.Default
     private List<Device> devices = new ArrayList<>();
 
     @OneToMany(mappedBy = "chipType", cascade = CascadeType.PERSIST)
+    @Builder.Default
     private List<FirmwareImage> firmwareImages = new ArrayList<>();
 }
