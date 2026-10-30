@@ -12,6 +12,11 @@ This document provides a comprehensive guide to every package and Java class in 
 5. [Request DTOs (`dto.request`)](#5-request-dtos-dtorequest)
 6. [Response DTOs (`dto.response`)](#6-response-dtos-dtoresponse)
 7. [Mapping Components (`mapper`)](#7-mapping-components-mapper)
+8. [Data Seeding (`seeder`)](#8-data-seeding-seeder)
+9. [Exception Handling (`exception`)](#9-exception-handling-exception)
+10. [Application Configuration (`config`)](#10-application-configuration-config)
+11. [Service Layer (`service`)](#11-service-layer-service)
+12. [REST Controllers (`controller`)](#12-rest-controllers-controller)
 
 ---
 
@@ -278,9 +283,91 @@ Spring `@Component` beans providing clean, bidirectional transformation between 
 
 ---
 
+## 8. Data Seeding (`seeder`)
+
+**Package:** `com.juneth.ota_updates_backend.seeder`
+
+### `DataSeeder.java`
+- **Purpose:** Spring Boot `CommandLineRunner` component that executes on application startup to seed default hardware configurations.
+- **Key Responsibilities:**
+  - Seeds the 5 initial supported board variants (`ChipType`) and their flash sizes:
+    1. `NodeMCU-32S` (4 MB = 4,194,304 bytes)
+    2. `ESP32-s3` (8 MB = 8,388,608 bytes)
+    3. `ESP32-S3-SuperMini` (4 MB = 4,194,304 bytes)
+    4. `ESP32-C3` (4 MB = 4,194,304 bytes)
+    5. `ESP32-C3-SuperMini` (4 MB = 4,194,304 bytes)
+  - Automatically seeds the corresponding 5 initial `DeviceGroup` records with matching names.
+  - **Idempotency:** Checks existence before inserting (`existsByName`), making it completely safe across multiple application restarts.
+  - **Conditional:** Annotated with `@ConditionalOnProperty(name = "app.seeder.enabled", havingValue = "true", matchIfMissing = true)`, allowing it to be disabled via configuration if desired.
+
+---
+
+## 9. Exception Handling (`exception`)
+
+**Package:** `com.juneth.ota_updates_backend.exception`
+
+### `ResourceNotFoundException.java`
+- **Purpose:** Thrown when a requested resource (ChipType, Device, Group, etc.) cannot be found by its identifier.
+- **HTTP Status:** `404 Not Found`.
+
+### `DuplicateResourceException.java`
+- **Purpose:** Thrown when an entity violates uniqueness constraints (e.g. creating a chip type or device with an existing name/MAC).
+- **HTTP Status:** `409 Conflict`.
+
+### `InvalidOperationException.java`
+- **Purpose:** Thrown when a business logic precondition is violated (e.g., attempting to delete a chip type with active devices attached).
+- **HTTP Status:** `400 Bad Request`.
+
+### `GlobalExceptionHandler.java`
+- **Purpose:** Centralized `@RestControllerAdvice` that intercepts all controller exceptions and converts them into uniform, structured `ErrorResponse` JSON bodies with timestamps, HTTP status codes, error names, human-readable messages, request paths, and optional field-level validation breakdowns.
+
+---
+
+## 10. Application Configuration (`config`)
+
+**Package:** `com.juneth.ota_updates_backend.config`
+
+### `SecurityConfig.java`
+- **Purpose:** Initial development security configuration allowing unauthenticated access to REST API endpoints until Stage 26 (Session Authentication).
+- **Key Responsibilities:**
+  - Disables CSRF and CORS for headless API calls and CLI testing.
+  - Configures `SecurityFilterChain` permitting all HTTP requests during development.
+
+---
+
+## 11. Service Layer (`service`)
+
+**Package:** `com.juneth.ota_updates_backend.service`
+
+### `ChipTypeService.java`
+- **Purpose:** Business logic coordinator for chip type lifecycle management.
+- **Key Responsibilities:**
+  - `createChipType`: Validates name uniqueness, saves the `ChipType`, and **automatically creates a corresponding `DeviceGroup`** with the exact matching name if not already existing.
+  - `getAllChipTypes`: Returns all registered chip types mapped to `ChipTypeResponse` DTOs with active device counts.
+  - `getChipTypeById`: Retrieves single chip type by UUID or throws `ResourceNotFoundException`.
+  - `updateChipType`: Updates description and flash memory size.
+  - `deleteChipType`: Enforces safety by preventing deletion if devices or firmware images are currently attached.
+
+---
+
+## 12. REST Controllers (`controller`)
+
+**Package:** `com.juneth.ota_updates_backend.controller`
+
+### `ChipTypeController.java`
+- **Base Path:** `/api/chip-types`
+- **Endpoints:**
+  - `POST /api/chip-types` — Registers a new chip type (201 Created). Auto-creates matching device group.
+  - `GET /api/chip-types` — Lists all registered chip types (200 OK).
+  - `GET /api/chip-types/{id}` — Fetches chip type details by UUID (200 OK).
+  - `PUT /api/chip-types/{id}` — Updates chip type description and/or flash size (200 OK).
+  - `DELETE /api/chip-types/{id}` — Deletes unattached chip type (204 No Content).
+
+---
+
 ## Initial Board Groups Requirement
 
-As configured for Stage 5+, the initial automatically created board groups corresponding to supported chip types are:
+The initial automatically created board groups corresponding to supported chip types are:
 1. `NodeMCU-32S`
 2. `ESP32-s3`
 3. `ESP32-S3-SuperMini`
