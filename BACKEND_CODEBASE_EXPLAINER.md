@@ -348,6 +348,16 @@ Spring `@Component` beans providing clean, bidirectional transformation between 
   - `updateChipType`: Updates description and flash memory size.
   - `deleteChipType`: Enforces safety by preventing deletion if devices or firmware images are currently attached.
 
+### `DeviceGroupService.java`
+- **Purpose:** Business logic coordinator for device group lifecycle management and group-device membership queries.
+- **Key Responsibilities:**
+  - `createGroup(CreateDeviceGroupRequest)`: Validates name uniqueness (409 Conflict if duplicate), saves the group, returns `DeviceGroupResponse` with device count.
+  - `getAllGroups()`: Returns all groups with device counts mapped to `DeviceGroupResponse`.
+  - `getGroupById(UUID)`: Retrieves single group by UUID or throws `ResourceNotFoundException` (404).
+  - `getDevicesInGroup(UUID groupId)`: Returns `List<DeviceResponse>` for all devices that are members of the specified group via `DeviceRepository.findByDeviceGroupsId()`.
+  - `updateGroup(UUID, UpdateDeviceGroupRequest)`: Updates name and/or description with uniqueness check; returns updated `DeviceGroupResponse`.
+  - `deleteGroup(UUID)`: **Safety check** — prevents deletion if the group has any `PENDING` or `IN_PROGRESS` update assignments. Before deletion, dissociates the group from all member devices (clears the Many-to-Many join table `device_group_memberships`) to maintain referential integrity.
+
 ---
 
 ## 12. REST Controllers (`controller`)
@@ -362,6 +372,16 @@ Spring `@Component` beans providing clean, bidirectional transformation between 
   - `GET /api/chip-types/{id}` — Fetches chip type details by UUID (200 OK).
   - `PUT /api/chip-types/{id}` — Updates chip type description and/or flash size (200 OK).
   - `DELETE /api/chip-types/{id}` — Deletes unattached chip type (204 No Content).
+
+### `DeviceGroupController.java`
+- **Base Path:** `/api/device-groups`
+- **Endpoints:**
+  - `POST /api/device-groups` — Creates a new device group (201 Created). Validates name uniqueness (409 Conflict).
+  - `GET /api/device-groups` — Lists all device groups with device counts (200 OK). Includes the 5 auto-seeded board groups.
+  - `GET /api/device-groups/{id}` — Fetches group details by UUID (200 OK) or 404 Not Found.
+  - `GET /api/device-groups/{id}/devices` — Lists all devices belonging to the group (200 OK). Returns empty array if no members.
+  - `PUT /api/device-groups/{id}` — Updates group name and/or description (200 OK). Validates uniqueness on rename (409 Conflict).
+  - `DELETE /api/device-groups/{id}` — Deletes the group (204 No Content). Blocks with 400 Bad Request if active (PENDING/IN_PROGRESS) update assignments exist. Cascades device dissociation before deletion.
 
 ---
 
